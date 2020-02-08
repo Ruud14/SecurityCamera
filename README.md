@@ -3,6 +3,7 @@
 Project status: not finished
 
 **Raspberry Pi Zero W security camera system.**
+<<<<<<< HEAD
 Script that sends a video feed from the Raspberry Pi over the network and starts recording when there is motion.
 You can display this live video feed in a django view, and the recordings can be saved.
 
@@ -28,6 +29,19 @@ In this version the Raspberry pi sends the camera feed to the server frame by fr
 **How to use:**
 - Get yourself a Raspberry pi and a (Night Vision IR) camera module.
 - Install an os and python3 + OpenCV.
+=======
+Script that sends a live video feed from the raspberry pi to the server.
+the server processes the data, shows it on a django web page and saves the video stream when motion gets detected.
+
+**I strongly recommend you use version 2 since it is faster and is way easier to use.**
+
+### _VERSION 1_
+
+
+**How to use:**
+- Get yourself a Raspberry pi and a (Night Vision IR) camera module.
+- Install an os and python3 + openCV.
+>>>>>>> 1a8a596c1df1d8e66eee2b255d221fe2e337e382
 - Put the `Raspberry Pi.py` script on your Raspberry pi.
 - enable the camera in the `sudo raspi-config` menu.
 - You might want the script start on boot. I achieved this using crontab.
@@ -44,6 +58,7 @@ In this version the Raspberry pi sends the camera feed to the server frame by fr
 - Enjoy
 
 ### _VERSION 2_
+<<<<<<< HEAD
 
 In this version the Raspberry pi hosts a little http site with the stream of the camera on it. The server then scrapes that site and grabs the video stream.
 Whenever motion is detected in the video stream the server will start the recording. **The main disadvantage here is that the fps of the recording is slow when the internet connection is slow.**
@@ -51,10 +66,18 @@ Whenever motion is detected in the video stream the server will start the record
 **How to use:**
 - Get yourself a Raspberry pi and a (Night Vision IR) camera module.
 - Install an os and python3 + OpenCV.
+=======
+The raspberry pi script of this version is based on this project https://github.com/pschmitt/docker-picamera from https://github.com/pschmitt
+
+**How to use:**
+- Get yourself a Raspberry pi and a (Night Vision IR) camera module.
+- Install an os and python3 + openCV.
+>>>>>>> 1a8a596c1df1d8e66eee2b255d221fe2e337e382
 - Put the `Raspberry Pi.py` script on your Raspberry pi.
 - enable the camera in the `sudo raspi-config` menu.
 - You might want the script start on boot. I achieved this using crontab.
 - Make a file called `data.json` and put it in the same folder as your `Raspberry Pi.py`.
+<<<<<<< HEAD
 - In your `data.json` add `{"username":"pi", "password":"picamera"}`. You might want to change the values.
 - In `Raspberry Pi.py` change `/home/pi/camera/Camera/data.json` to the file location of your `data.json`.
 - Put the `CameraReceiver.py` and `Camera.py` scripts on your server/host machine.
@@ -91,6 +114,17 @@ It is different from version 2 because here the recording (after movement is det
 
 ### Additional info.
 
+=======
+- In your `data.json` add `{"username":"pi", "password":"picamera"}` you might want to change the values, but you'll also have to do that in `CameraReceiver.py`.
+- In `Raspberry Pi.py` change `/home/pi/camera/Camera/data.json` to the file location of your `data.json`.
+- Put the `CameraReceiver.py` and `Camera.py` on your server/host machine.
+- Also add that same `data.json` file from before to the folder your `CameraReceiver.py` is in.
+- In `Camera.py` in the `Camera` class change `video_output_folder` from `.\\Recordings\\` to whatever path you want your video's to be stored in.
+- In `CameraReceiver.py` change `file = open('data.json')` to the file location of your `data.json`.
+- In `use.py` change the ip address to the ip of your camera.
+- Enjoy
+
+>>>>>>> 1a8a596c1df1d8e66eee2b255d221fe2e337e382
 **What I learned:**
 - My first time using a Raspberry pi.
 - OpenCV in python.
@@ -98,6 +132,7 @@ It is different from version 2 because here the recording (after movement is det
 - Use of crontab in linux.
 - Use of base64
 - HTTP/MJPG streaming
+<<<<<<< HEAD
 - FFMPEG
 
 
@@ -109,3 +144,5 @@ The os used on the raspberry pi is 'Raspbian Buster Lite'.
 The OpenCV version used on the raspberry pi is '3.4.6'
 The ffmpeg version used on the raspberry pi is 'git-2020-01-17-c95dfe5'
 The python version used on the raspberry pi is 'Python 3.7.3'
+=======
+>>>>>>> 1a8a596c1df1d8e66eee2b255d221fe2e337e382
