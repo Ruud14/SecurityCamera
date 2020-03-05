@@ -1,2 +1,2 @@
 from CameraReceiver import CameraReceiver
-receiver = CameraReceiver(["localhost"])
+receiver = CameraReceiver(["192.168.178.206"])

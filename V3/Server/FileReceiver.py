@@ -5,13 +5,13 @@ import time
 import os
 
 video_output_folder = "C:/Users/Ruud Brouwers/Desktop/recordings/"
-max_storage = 0.15 # In Gb
+max_storage = 1 # In Gb
 
 
 # Sets up the socket and accepts clients.
 def main():
     host = '192.168.178.129'
-    port = 5000
+    port = 5005
 
     s = socket.socket()
     s.bind((host,port))
