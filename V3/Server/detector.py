@@ -20,7 +20,7 @@ cameras = []
 
 
 class Camera:
-    motion_sensitivity = 5  # Higher number = more detection
+    motion_sensitivity = 5  # Higher number = less detection
     current_frame = None
     is_connected = False
     message_port = 5006
