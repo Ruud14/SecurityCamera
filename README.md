@@ -1,6 +1,6 @@
 # Raspberry Pi Zero W security camera system.
 
-Project status: not finished
+Project status: finished, but nowhere near perfect.
 
 **Raspberry Pi Zero W security camera system.**
 
