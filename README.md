@@ -1,4 +1,4 @@
-# Raspberry Pi Zero W security camera system.
+# Raspberry Pi (Zero W) security camera system.
 
 Project status: finished, but nowhere near perfect.
 
