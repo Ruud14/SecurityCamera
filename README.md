@@ -16,6 +16,7 @@ Every version has its own advantages and disadvantages but **I strongly recommen
 |               | - Requires less processing power on the Rb Pi.        | **- Recording fps depends on internet speed.**                                    |
 | V3            | - Higher frame rate recordings.                       | - Requires FFMPEG to be installed.                                                |  
 |               | **- Recording fps isn't affected by internet speed.** |                                                                                   |  
+|               | **- Also records frames that happened before there the motion got detected.** |                                                                                   |  
 
 
 ### _VERSION 1_
