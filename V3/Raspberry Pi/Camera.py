@@ -1,18 +1,13 @@
-import cv2
 import time
 import threading
-import numpy as np
 import datetime
 import os
-import urllib.request
 import subprocess
 import socket
 
 
 class Camera:
     # ------------- Values you might want to change ----------------
-    picture_size = (1280, 720)
-    motion_sensitivity = 20  # Higher number = less detection
     video_output_folder = "/home/pi/recordings/"
     record_seconds_after_movement = 10
     max_recording_time = 300    # in seconds
@@ -27,7 +22,7 @@ class Camera:
     is_connected = False
 
     def __init__(self,url,id,up):
-        self.ip = self.get_ip()
+        self.ip = "192.168.178.178"
         self.url = url
         self.id = id
         self.is_connected = True
@@ -35,20 +30,14 @@ class Camera:
         self.password = up[1]
         record_thread = threading.Thread(target=self.recv_msg).start()
 
-    # Grabs the local ip adress.
-    def get_ip(self):
-        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        s.connect(("8.8.8.8", 80))
-        ip = s.getsockname()[0]
-        s.close()
-        return ip
-
     # Starts the recording
     def start_recording(self):
         current_time = str(datetime.datetime.now())[11:13]+"-"+str(datetime.datetime.now())[14:16]+'-'+str(datetime.datetime.now())[17:19]
         output_filepath = os.path.join(self.video_output_folder, current_time+".mp4")
 
-        proc = subprocess.Popen(['ffmpeg', '-i', f'http://{self.username}:{self.password}@localhost:8000/stream.mjpg', '-an', '-vcodec', 'copy', f"{output_filepath}"], stdin=subprocess.PIPE)
+        proc = subprocess.Popen(['ffmpeg', '-i', f'http://{self.username}:{self.password}@localhost:8000/delayed_stream.mjpg', '-an', '-vcodec', 'copy', f"{output_filepath}"], stdin=subprocess.PIPE)
+        # libx262, but there was something wrong with my ffmpeg so this didn't work for me.
+        #proc = subprocess.Popen(['ffmpeg', '-i', f'http://{self.username}:{self.password}@localhost:8000/delayed_stream.mjpg', '-an', '-pix_fmt', 'yuv420p', '-b:v', '4000k', '-c:v', 'libx264', f"{output_filepath}"], stdin=subprocess.PIPE)
         threading.Thread(target=self.start_countdown, args=(proc,output_filepath,), daemon=True).start()
 
     # Checks for incoming request to start the recording.
