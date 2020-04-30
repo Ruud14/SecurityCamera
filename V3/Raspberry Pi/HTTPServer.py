@@ -16,8 +16,8 @@ AUTH_PASSWORD = stored_data['password']
 AUTH_BASE64 = base64.b64encode('{}:{}'.format(
     AUTH_USERNAME, AUTH_PASSWORD).encode('utf-8'))
 BASIC_AUTH = 'Basic {}'.format(AUTH_BASE64.decode('utf-8'))
-RESOLUTION_X = 1920
-RESOLUTION_Y = 1080
+RESOLUTION_X = 1280
+RESOLUTION_Y = 720
 FRAMERATE = 30
 ROTATION = 0
 HFLIP = True
@@ -40,6 +40,7 @@ class StreamingOutput(object):
         self.frame = None
         self.buffer = io.BytesIO()
         self.condition = Condition()
+        self.old_frames = []
 
     def write(self, buf):
         if buf.startswith(b'\xff\xd8'):
@@ -48,6 +49,9 @@ class StreamingOutput(object):
             self.buffer.truncate()
             with self.condition:
                 self.frame = self.buffer.getvalue()
+                self.old_frames.append(self.frame)
+                if len(self.old_frames) > 60:
+                    del self.old_frames[0]
                 self.condition.notify_all()
             self.buffer.seek(0)
         return self.buffer.write(buf)
@@ -104,6 +108,32 @@ class StreamingHandler(server.BaseHTTPRequestHandler):
                 logging.warning(
                     'Removed streaming client %s: %s',
                     self.client_address, str(e))
+
+        elif self.path == '/delayed_stream.mjpg':
+            self.send_response(200)
+            self.send_header('Age', 0)
+            self.send_header('Cache-Control', 'no-cache, private')
+            self.send_header('Pragma', 'no-cache')
+            self.send_header('Content-Type', 'multipart/x-mixed-replace; boundary=FRAME')
+            self.end_headers()
+            try:
+                while True:
+                    if len(output.old_frames) > 50:
+                        frame = output.old_frames[0]
+                        del output.old_frames[0]
+                    else:
+                        continue
+                    self.wfile.write(b'--FRAME\r\n')
+                    self.send_header('Content-Type', 'image/jpeg')
+                    self.send_header('Content-Length', len(frame))
+                    self.end_headers()
+                    self.wfile.write(frame)
+                    self.wfile.write(b'\r\n')
+            except Exception as e:
+                logging.warning(
+                    'Removed streaming client %s: %s',
+                    self.client_address, str(e))
+
         else:
             self.send_error(404)
             self.end_headers()
