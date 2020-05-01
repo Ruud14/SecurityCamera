@@ -1,11 +1,12 @@
 import socket
 import threading
 import datetime
+import subprocess
 import time
 import os
 
 video_output_folder = "C:/Users/Ruud Brouwers/Desktop/recordings/"
-max_storage = 1 # In Gb
+max_storage = 25 # In Gb
 
 
 # Sets up the socket and accepts clients.
@@ -35,7 +36,7 @@ def recvfile(s):
 
     current_time = str(datetime.datetime.now())[11:13] + "-" + str(datetime.datetime.now())[14:16] + '-' + str(
         datetime.datetime.now())[17:19]
-    filepath = os.path.join(video_output_folder, current_date, current_time + ".mp4")
+    filepath = os.path.join(video_output_folder, current_date, current_time +"MJPEG"+ ".mp4")
 
     data = s.recv(4096)
     data = data.decode()
@@ -51,10 +52,29 @@ def recvfile(s):
             data = s.recv(4096)
             totalRecv += len(data)
             f.write(data)
+        f.close()
         print("download Complete!")
+        try:
+            time.sleep(3)
+            convert_to_libx264(filepath)
+        except Exception as e:
+            print(str(e))
+            os.rename(filepath, filepath.replace("MJEPG.mp4", ".mp4"))
+
     else:
         print("File does not exist!")
     s.close()
+
+
+# Converts the received file to h264 format.
+def convert_to_libx264(filepath):
+    print("converting {}...".format(filepath))
+    proc = subprocess.call(
+        ['ffmpeg', '-i', f'{filepath}', '-pix_fmt',
+         'yuv420p', '-b:v', '4000k','-c:v', 'libx264', f"{filepath.replace('MJPEG.mp4','.mp4')}", '-an'])
+    time.sleep(3)
+    os.remove(filepath)
+    print("conversion complete")
 
 
 # Makes room for video's is there isn't enough.
