@@ -7,6 +7,9 @@ Project status: finished, but nowhere near perfect.
 Script that sends a video feed from the Raspberry Pi over the network and starts recording when there is motion. The recordings will be saved and removed when the storage gets full. 
 The camera and the recordings can be looked at using a Django website  (https://github.com/Ruud14/Django-Camera-View-And-Playback). This feature only works with version 3.
 
+![image](https://i.imgur.com/9pVfhrq.png)
+Schematic of version 3.
+
 Every version has its own advantages and disadvantages but **I strongly recommend you use version 2 or 3 since they are faster and are way easier to use. Version 3 isn't always better than version 2 though. It just depends on your needs.**
 
 | Version       | Advantages                                            | Disadvantages                                                                     |
@@ -20,8 +23,6 @@ Every version has its own advantages and disadvantages but **I strongly recommen
 |               | **- Also records frames that happened before there the motion got detected.** |                                                                                   |  
 |               | Stores the recordings in h264 format for easier playback and less storage occupation. |                                                                                   |  
 
-![image](https://i.imgur.com/9pVfhrq.png)
-Schematic of version 3.
 
 ### _VERSION 1_
 In this version the Raspberry pi sends the camera feed to the server frame by frame using raw tcp sockets. The server receives these frames and detects motion in them. When it does detect motion it starts the recording.
