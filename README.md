@@ -20,7 +20,7 @@ Every version has its own advantages and disadvantages but **I strongly recommen
 |               | **- Also records frames that happened before there the motion got detected.** |                                                                                   |  
 |               | Stores the recordings in h264 format for easier playback and less storage occupation. |                                                                                   |  
 
-![image](https://imgur.com/9pVfhrq)
+![image](https://i.imgur.com/9pVfhrq.png)
 Schematic of version 3.
 
 ### _VERSION 1_
