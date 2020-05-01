@@ -5,7 +5,7 @@ Project status: finished, but nowhere near perfect.
 **Raspberry Pi Zero W security camera system.**
 
 Script that sends a video feed from the Raspberry Pi over the network and starts recording when there is motion. The recordings will be saved and removed when the storage gets full. 
-The camera and the recordings can be looked at using a Django website  (https://github.com/Ruud14/Django-Camera-View-And-Playback). This feature only works with version 3.
+The camera and the recordings can be looked at using a Django website  (https://github.com/Ruud14/Django-Camera-View-And-Playback). This feature only works with version 3. Version 3 also has a nice feature where the recording always contains the a couple of frames from before the action happened that triggered the recording. 
 
 ![image](https://i.imgur.com/9pVfhrq.png)
 Schematic of version 3.
