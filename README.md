@@ -4,7 +4,8 @@ Project status: finished, but nowhere near perfect.
 
 **Raspberry Pi Zero W security camera system.**
 
-Script that sends a video feed from the Raspberry Pi over the network and starts recording when there is motion. The recordings will be saved and removed when the storage gets full. The camera and the recordings can be looked at using a Django website  (https://github.com/Ruud14/Django-Camera-View-And-Playback).
+Script that sends a video feed from the Raspberry Pi over the network and starts recording when there is motion. The recordings will be saved and removed when the storage gets full. 
+The camera and the recordings can be looked at using a Django website  (https://github.com/Ruud14/Django-Camera-View-And-Playback). This feature only works with version 3.
 
 Every version has its own advantages and disadvantages but **I strongly recommend you use version 2 or 3 since they are faster and are way easier to use. Version 3 isn't always better than version 2 though. It just depends on your needs.**
 
@@ -17,7 +18,10 @@ Every version has its own advantages and disadvantages but **I strongly recommen
 | V3            | - Higher frame rate recordings.                       | - Requires FFMPEG to be installed.                                                |  
 |               | **- Recording fps isn't affected by internet speed.** |                                                                                   |  
 |               | **- Also records frames that happened before there the motion got detected.** |                                                                                   |  
+|               | Stores the recordings in h264 format for easier playback and less storage occupation. |                                                                                   |  
 
+![image](https://imgur.com/9pVfhrq)
+Schematic of version 3.
 
 ### _VERSION 1_
 In this version the Raspberry pi sends the camera feed to the server frame by frame using raw tcp sockets. The server receives these frames and detects motion in them. When it does detect motion it starts the recording.
@@ -46,8 +50,6 @@ In this version the Raspberry pi sends the camera feed to the server frame by fr
 In this version the Raspberry pi hosts a little http site with the stream of the camera on it. The server then scrapes that site and grabs the video stream.
 Whenever motion is detected in the video stream the server will start the recording. **The main disadvantage here is that the fps of the recording is slow when the internet connection is slow.**
 
-The raspberry pi script of this version is based on this project https://github.com/pschmitt/docker-picamera from https://github.com/pschmitt
-
 **How to use:**
 - Get yourself a Raspberry pi and a (Night Vision IR) camera module.
 - Install an os and python3 + openCV.
@@ -55,13 +57,13 @@ The raspberry pi script of this version is based on this project https://github.
 - enable the camera in the `sudo raspi-config` menu.
 - You might want the script start on boot. I achieved this using crontab.
 - Make a file called `data.json` and put it in the same folder as your `Raspberry Pi.py`.
-<<<<<<< HEAD
 - In your `data.json` add `{"username":"pi", "password":"picamera"}`. You might want to change the values.
 - In `Raspberry Pi.py` change `/home/pi/camera/Camera/data.json` to the file location of your `data.json`.
 - Put the `CameraReceiver.py` and `Camera.py` scripts on your server/host machine.
 - You might also want this script to start on boot, again I used crontab.
 - Also add that same `data.json` file from before to the folder your `CameraReceiver.py` is in.
 - In `Camera.py` in the `Camera` class change `video_output_folder` from `.\\Recordings\\` to whatever path you want your video's to be stored in.
+- In `Camera.py` in the `Camera` class you can change `motion_sensitivity` to change the sensitivity for detecting motion.
 - In `CameraReceiver.py` change `data.json` in `file = open('data.json')` to the file location of your `data.json`.
 - In `use.py` change the ip address to the ip of your camera.
 - Enjoy
@@ -72,7 +74,7 @@ In this version the Raspberry pi still hosts a little http site with the stream 
 It is different from version 2 because here the recording (after movement is detected) takes place on the Raspberry pi itself instead of on the server.
 The movement is detected on the server side and the server then sends a message to the camera to start the recording.
 After the recording is done the recording is sent to the server.
-**The main advantage here is that the fps of the recording isn't affected by the internet speed.** 
+**The main advantages here are that the fps of the recording isn't affected by the internet speed and that it records frames that happen before there the motion was detected. So the action causing the camera to record will always be visible in the recording.** 
 
 **How to use:**
 - Get yourself a Raspberry pi and a camera module.
@@ -95,6 +97,7 @@ After the recording is done the recording is sent to the server.
 - In `use.py` change the ip-address to the ip of your camera/Raspberry pi.
 - Make a file called `data.json` and put it in the same folder as your `detector.py`, `CameraReceiver.py`, `FileReceiver.py` and `use.py` (if there isn't one already).
 - In your `data.json` add the same content as in the `data.json` file of your Raspberry pi.
+- In `detector.py` in the `Camera` class you can change `motion_sensitivity` to change the sensitivity for detecting motion.
 - You might also want this script to start on boot, again I used crontab.
 - Enjoy
 
@@ -111,7 +114,7 @@ After the recording is done the recording is sent to the server.
 - FFMPEG
 
 
-Part of the script running on the raspberry pi in version 2 & 3 is based on this project https://github.com/pschmitt/docker-picamera from https://github.com/pschmitt
+Part of the script running on the raspberry pi in version 2 & 3 is based on [this project](https://github.com/pschmitt/docker-picamera).
 
 This project assumes that the Raspberry Pi and the server/host are on the same network.
 
