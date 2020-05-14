@@ -44,6 +44,7 @@ In this version the Raspberry pi sends the camera feed to the server frame by fr
 - You might want to change the `camera_count` to the amount of camera's you're using. (The value of `camera_count` can be more but can't be less.)
 - If your host machine's os has a GUI you might want to enable `cv2.imshow("Frame",frame_data)` in the `recv_stream` method.
 - If you want to use this with a django webpage you'd want to get the content of `django_views.py` and add it to your django `views.py`. You should also change `from .scripts.Cameras_Receiver import CameraReceiver` in `django_views.py` to `from PATH_TO_YOUR_CAMERASRECEIVERSCRIPT import CameraReceiver`.
+- Just to make sure that you don't have to change the ip's in the code every time your router resets, Reserve the ip addresses of both the host and the Raspberry pi in the settings of your router. 
 - Enjoy
 
 ### _VERSION 2_
@@ -67,6 +68,7 @@ Whenever motion is detected in the video stream the server will start the record
 - In `Camera.py` in the `Camera` class you can change `motion_sensitivity` to change the sensitivity for detecting motion.
 - In `CameraReceiver.py` change `data.json` in `file = open('data.json')` to the file location of your `data.json`.
 - In `use.py` change the ip address to the ip of your camera.
+- Just to make sure that you don't have to change the ip's in the code every time your router resets, Reserve the ip addresses of both the host and the Raspberry pi in the settings of your router. 
 - Enjoy
 
 ### _VERSION 3_
@@ -100,6 +102,7 @@ After the recording is done the recording is sent to the server.
 - In your `data.json` add the same content as in the `data.json` file of your Raspberry pi.
 - In `detector.py` in the `Camera` class you can change `motion_sensitivity` to change the sensitivity for detecting motion.
 - You might also want this script to start on boot, again I used crontab.
+- Just to make sure that you don't have to change the ip's in the code every time your router resets, Reserve the ip addresses of both the host and the Raspberry pi in the settings of your router. 
 - Enjoy
 
 
