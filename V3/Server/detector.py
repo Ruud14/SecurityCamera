@@ -119,4 +119,4 @@ def add_camera(ip):
     print("Added Camera {}".format(ip))
 
 
-add_camera("192.168.178.220")
+
