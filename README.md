@@ -92,6 +92,7 @@ After the recording is done the recording is sent to the server.
 - In `HTTPServer.py` change `/home/pi/scripts/data.json` to the file location of your `data.json`.
 - In `CameraReceiver.py` change `data.json` in `file = open('data.json')` to the same location as in `HTTPServer.py`.
 - In `Camera.py` in the `Camera` class change `video_output_folder` from `/home/pi/recordings/` to whatever path you want your video's to be stored in. (The recordings will get removed after sending it to the server.)
+- In `use.py` change the ip address to the ip of your camera/Raspberry pi.
 - In `Camera.py` change the `server_ip` to the ip address of your server/host.
 
 *On the Server:*
@@ -101,7 +102,8 @@ After the recording is done the recording is sent to the server.
 - Make a file called `data.json` and put it in the same folder as your `detector.py`, `CameraReceiver.py`, `FileReceiver.py` and `use.py` (if there isn't one already).
 - In your `data.json` add the same content as in the `data.json` file of your Raspberry pi.
 - In `detector.py` in the `Camera` class you can change `motion_sensitivity` to change the sensitivity for detecting motion.
-- You might also want this script to start on boot, again I used crontab.
+- Run `use.py` and `FileReceiver.py`.
+- You might also want the scripts to start on boot, again I used crontab.
 - Just to make sure that you don't have to change the ip's in the code every time your router resets, Reserve the ip addresses of both the host and the Raspberry pi in the settings of your router. 
 - Enjoy
 
