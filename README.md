@@ -101,6 +101,7 @@ After the recording is done the recording is sent to the server.
 - Make a file called `data.json` and put it in the same folder as your `detector.py`, `CameraReceiver.py`, `FileReceiver.py` and `use.py` (if there isn't one already).
 - In your `data.json` add the same content as in the `data.json` file of your Raspberry pi.
 - In `detector.py` in the `Camera` class you can change `motion_sensitivity` to change the sensitivity for detecting motion.
+- Also in `detector.py` change : Change the IP address on the last line of the file to the IP address of your camera/Raspberry pi.
 - You might also want this script to start on boot, again I used crontab.
 - Just to make sure that you don't have to change the ip's in the code every time your router resets, Reserve the ip addresses of both the host and the Raspberry pi in the settings of your router. 
 - Enjoy
