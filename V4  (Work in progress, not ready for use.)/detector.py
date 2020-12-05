@@ -3,8 +3,13 @@ import threading
 import numpy as np
 import urllib.request
 import json
+import subprocess
+import os
+import datetime
+import time
 
 stream_url = "http://{}:8000/stream.mjpg"
+# TODO: put framerate in global file
 
 
 # Class that handles logging into the camera.
@@ -22,16 +27,16 @@ class Authentication:
             opener = urllib.request.build_opener(handler)
             opener.open(self.url)
             urllib.request.install_opener(opener)
-            print(f"{self.ip} login succeeded.")
+            print("{} login succeeded.".format(self.ip))
             return True
-        except Exception: #todo: Get right exception.
+        except urllib.error.URLError:
             print("Camera login failed.")
             return False
 
 
 # Class that handles the detection of motion in the live camera feed.
 class Detector:
-    def __init__(self, ip, username, password, sensitivity, detection_resolution=(640, 480)):
+    def __init__(self, ip, username, password, sensitivity, detection_resolution=(80, 45)):
         self.ip = ip
         self.credentials = (username, password)
         # The sensitivity. Higher number = less detection.
@@ -42,6 +47,8 @@ class Detector:
         # Create the current frame variables.
         self._current_frame = None
         self._current_low_res_frame = None
+        # Create the recorder
+        self.recorder = Recorder(self.ip, self.credentials)
 
     # Starts the detector.
     def start(self):
@@ -49,13 +56,13 @@ class Detector:
         authenticated = Authentication(self.ip).authenticate(*self.credentials)
         # Start the detection of motion if the authentication succeeded.
         if authenticated:
-            receive_thread = threading.Thread(target=self.receive_steam)
-            detect_thread = threading.Thread(target=self.detect_motion)
+            receive_thread = threading.Thread(target=self._receive_steam)
+            detect_thread = threading.Thread(target=self._detect_motion)
             receive_thread.start()
             detect_thread.start()
 
     # Receives the live video feed from the camera.
-    def receive_steam(self):
+    def _receive_steam(self):
         # start streaming
         stream = urllib.request.urlopen(stream_url.format(self.ip))
         bytes = b''
@@ -73,7 +80,8 @@ class Detector:
                 self._current_low_res_frame = low_res_frame
                 self._current_frame = frame
 
-    def detect_motion(self):
+    def _detect_motion(self):
+        blur = (5, 5)
         # Wait until the first frame is found. Start detecting afterwards.
         while True:
             try:
@@ -82,14 +90,15 @@ class Detector:
             except Exception:
                 continue
 
-        print(f"Motion detection on {self.ip} started.")
+        print("Motion detection on {} started.".format(self.ip))
         # get the previous frame.
         start_frame = cv2.cvtColor(self._current_low_res_frame, cv2.COLOR_BGR2GRAY)
+        start_frame = cv2.GaussianBlur(start_frame, blur, 0)
         while True:
             # get the current frame.
             next_frame = cv2.cvtColor(self._current_low_res_frame, cv2.COLOR_BGR2GRAY)
-
-            #TODO: Show frames for testing.
+            next_frame = cv2.GaussianBlur(next_frame, blur, 0)
+            # TODO: Show frames for testing.
             # cv2.imshow("Resized image", next_frame)
             # cv2.waitKey(1)
 
@@ -100,11 +109,61 @@ class Detector:
 
             # Start recording when the difference between the frames is too big.
             if thresh.sum() > 100:
-                print(f"Movement detected on {self.ip}.")
+                print("Movement detected on {}.".format(self.ip))
+                self.recorder.report_motion()
+
+
+# Class that handles the recording.
+class Recorder:
+    def __init__(self, ip, credentials):
+        self.ip = ip
+        self.credentials = credentials
+        self.video_output_folder = "/home/pi/recordings/"
+        self.record_seconds_after_movement = 10
+        self.max_recording_seconds = 300
+        self.timer = 0
+
+    # Method to call when there is motion.
+    # This will start the recording if it hadn't already been started.
+    # Extend the recording if the recording has already started.
+    def report_motion(self):
+        if self.timer == 0:
+            self.timer = self.record_seconds_after_movement
+            self._start_recording()
+        else:
+            self.timer = self.record_seconds_after_movement
+
+    # Starts the recording
+    def _start_recording(self):
+        current_time_string = str(datetime.datetime.now())[11:13] + "-" + str(datetime.datetime.now())[14:16] + '-' + str(
+            datetime.datetime.now())[17:19]
+        output_file_path = os.path.join(self.video_output_folder, current_time_string + ".mp4")
+
+        process = subprocess.Popen(
+            ['ffmpeg', '-use_wallclock_as_timestamps', '1', '-i', 'http://{}:{}@localhost:8000/delayed_stream.mjpg'.format(*self.credentials), '-an',
+             '-vcodec', 'copy', "{}".format(output_file_path)], stdin=subprocess.PIPE)
+
+        threading.Thread(target=self._start_countdown, args=(process, output_file_path,), daemon=True).start()
+
+    # Starts counting down from record_seconds_after_movement after movement is detected.
+    def _start_countdown(self, process, file_path):
+        self.timer = self.record_seconds_after_movement
+        print("Started Recording {}".format(file_path))
+        recorded_time = 0
+        while self.timer > 0 and not recorded_time > self.max_recording_seconds:
+            time.sleep(1)
+            recorded_time += 1
+            self.timer -= 1
+        process.communicate(b'q')
+        time.sleep(1)
+        process.terminate()
+        process.kill()
+        print("Stopped Recording {}".format(file_path))
+        #self.send_recording(filepath)
 
 
 if __name__ == "__main__":
     with open('config.json') as file:
         stored_data = json.loads(file.read())
         for camera in stored_data:
-            Detector(*list(camera.values())).start()
+            Detector(camera["IP"], camera["username"], camera["password"], camera["sensitivity"]).start()
