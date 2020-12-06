@@ -7,22 +7,24 @@ import picamera
 import socketserver
 import json
 
+config_file_path = '/home/pi/scripts/V4/config.json'
 
-data_file = open('/home/pi/scripts/V4/data.json')
-stored_data = json.loads(data_file.read())
-data_file.close()
+with open(config_file_path) as file:
+    stored_data = json.loads(file.read())
+
 AUTH_USERNAME = stored_data['username']
 AUTH_PASSWORD = stored_data['password']
+DELAYED_FRAMES= stored_data['delayed_frames']
+
 AUTH_BASE64 = base64.b64encode('{}:{}'.format(
     AUTH_USERNAME, AUTH_PASSWORD).encode('utf-8'))
+
 BASIC_AUTH = 'Basic {}'.format(AUTH_BASE64.decode('utf-8'))
-# RESOLUTION_X = 2592
-# RESOLUTION_Y = 1944
+
 RESOLUTION_X = 1920
 RESOLUTION_Y = 1080
-FRAMERATE = 15
-DELAYED_FRAMES = 150
 ROTATION = 0
+FRAMERATE = 15
 HFLIP = True
 VFLIP = True
 

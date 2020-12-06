@@ -7,9 +7,10 @@ import subprocess
 import os
 import datetime
 import time
+import socket
 
 stream_url = "http://{}:8000/stream.mjpg"
-# TODO: put framerate in global file
+config_file_path = '/home/pi/scripts/V4/config.json'
 
 
 # Class that handles logging into the camera.
@@ -118,10 +119,12 @@ class Recorder:
     def __init__(self, ip, credentials):
         self.ip = ip
         self.credentials = credentials
-        self.video_output_folder = "/home/pi/recordings/"
-        self.record_seconds_after_movement = 10
-        self.max_recording_seconds = 300
+        self.video_output_folder = stored_data['local_video_output_folder']
+        self.record_seconds_after_movement = stored_data['record_seconds_after_movement']
+        self.max_recording_seconds = stored_data['max_recording_seconds']
+        self.storage_option = stored_data['storage_option']
         self.timer = 0
+        self.sender = Sender(self.storage_option)
 
     # Method to call when there is motion.
     # This will start the recording if it hadn't already been started.
@@ -159,11 +162,48 @@ class Recorder:
         process.terminate()
         process.kill()
         print("Stopped Recording {}".format(file_path))
-        #self.send_recording(filepath)
+        if self.storage_option != "local":
+            threading.Thread(target=self.sender.send_recording, args=(file_path,)).start()
+
+
+class Sender:
+    def __init__(self, storage_ip):
+        self.storage_ip = storage_ip
+        self.transfer_port = 5005
+
+    # Sends the recorded file to server and deletes the file.
+    def send_recording(self, filepath):
+        if os.path.isfile(filepath):
+            print("Sending Recording {} to server.".format(filepath))
+            s = socket.socket()
+            s.settimeout(5)
+            try:
+                s.connect((self.storage_ip, self.transfer_port))
+            except Exception as e:
+                print(
+                    "Sending recording failed,"
+                    " Still removing the recording to prevent local storage from getting full. \n",
+                    str(e))
+                os.remove(filepath)
+                return
+            s.settimeout(None)
+            s.send(("EXISTS" + str(os.path.getsize(filepath))).encode())
+            print("FileSize: ", str(os.path.getsize(filepath)).encode())
+            response = s.recv(1024)
+            response = response.decode()
+            if response.startswith('OK'):
+                with open(filepath, 'rb') as f:
+                    bytes_to_send = f.read(4096)
+                    s.send(bytes_to_send)
+                    while bytes_to_send != b"":
+                        bytes_to_send = f.read(4096)
+                        s.send(bytes_to_send)
+            s.close()
+            os.remove(filepath)
+            print("File Removed")
 
 
 if __name__ == "__main__":
-    with open('config.json') as file:
+    with open(config_file_path) as file:
         stored_data = json.loads(file.read())
-        for camera in stored_data:
-            Detector(camera["IP"], camera["username"], camera["password"], camera["sensitivity"]).start()
+        Detector(stored_data["IP"], stored_data["username"], stored_data["password"], stored_data["sensitivity"]).start()
