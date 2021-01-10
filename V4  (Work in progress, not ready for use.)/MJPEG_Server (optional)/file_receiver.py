@@ -61,7 +61,6 @@ def recvfile(s):
             f.write(data)
         f.close()
         print("download Complete!")
-
     else:
         print("File does not exist!")
     s.close()
