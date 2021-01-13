@@ -3,10 +3,11 @@ from picamera import PiCamera, PiVideoFrameType
 from string import Template
 import socket
 from websockethandler import WebSocketHandler
-from buffers import StreamBuffer, DetectionBuffer
+from buffers import StreamBuffer
 import time
 
 
+# function the get the content of a file.
 def get_file(filePath):
     file = open(filePath, 'r')
     content = file.read()
@@ -14,6 +15,7 @@ def get_file(filePath):
     return content
 
 
+# Function to substitute content into the template.
 def templatize(content, replacements):
     template = Template(content)
     return template.substitute(replacements)
@@ -22,33 +24,32 @@ def templatize(content, replacements):
 appHtml = None
 
 
+# Handler for the html of the streaming page.
 class HTMLHandler(tornado.web.RequestHandler):
     def get(self):
         self.write(appHtml)
 
 
+# Handler for the javascript of the streaming page.
 class JSHandler(tornado.web.RequestHandler):
     def get(self):
         self.write(get_file('jmuxer.min.js'))
 
 
+# Class that is responsible for streaming the camera footage to the web-page.
 class Streamer:
-    def __init__(self, motion_detector, streaming_resolution='1296x972', detection_resolution=(80,46), fps=15, port=8000, vflip=False, hflip=False, denoise=True):
-        self.motion_detector = motion_detector
+    def __init__(self, camera, streaming_resolution='1296x972', fps=15, port=8000, delayed_seconds=5):
         self.server_port = port
         self.server_ip = self._socket_setup()
         self.streaming_resolution = streaming_resolution
-        self.detection_resolution = detection_resolution
         self.fps = fps
-        self.camera = PiCamera(sensor_mode=4, resolution=streaming_resolution, framerate=fps)
-        self.camera.vflip = vflip
-        self.camera.hflip = hflip
-        self.delayed_seconds = 5
-        self.camera.video_denoise = denoise
+        self.delayed_seconds = delayed_seconds
+        self.camera = camera
+
         self.request_handlers = None
         self.detection_buffer = None
 
-    # Sets up the request handlers for tornado.
+    # Set up the request handlers for tornado.
     def _setup_request_handlers(self):
         self.request_handlers = [
             (r"/ws/", WebSocketHandler),
@@ -64,39 +65,37 @@ class Streamer:
     def _socket_setup(self):
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         s.connect(('8.8.8.8', 0))
-        serverIp = s.getsockname()[0]
-        return serverIp
+        server_ip = s.getsockname()[0]
+        return server_ip
 
     # Start streaming.
     def start(self):
         self._setup_request_handlers()
-
         try:
             # Create the stream and detection buffers.
-            stream_buffer = StreamBuffer(self.camera, self.fps,self.delayed_seconds)
-            self.detection_buffer = DetectionBuffer(self.motion_detector)
+            stream_buffer = StreamBuffer(self.camera, self.fps, self.delayed_seconds)
 
             # Start sending frames to the streaming thread.
             self.camera.start_recording(stream_buffer, **{
-                    'format' : 'h264',
-                    #'bitrate' : 25000000,
-                    'quality' : 25,
-                    'profile' : 'high',
-                    'level' : '4.2',
-                    'intra_period' : 15,
-                    'intra_refresh' : 'both',
-                    'inline_headers' : True,
-                    'sps_timing' : True
+                    'format': 'h264',
+                    #'bitrate': 25000000,
+                    'quality': 25,
+                    'profile': 'high',
+                    'level': '4.2',
+                    'intra_period': 15,
+                    'intra_refresh': 'both',
+                    'inline_headers': True,
+                    'sps_timing': True
                 })
-            # Start sending frames to the detection thread.
-            self.camera.start_recording(self.detection_buffer, splitter_port=2, resize=self.detection_resolution, format='mjpeg')
 
             # Create and loop the tornado application.
             application = tornado.web.Application(self.request_handlers)
             application.listen(self.server_port)
             loop = tornado.ioloop.IOLoop.current()
             stream_buffer.setLoop(loop)
+            print("Streamer started on http://{}:{}".format(self.server_ip, self.server_port))
             loop.start()
+
         except KeyboardInterrupt:
             self.camera.stop_recording()
             self.camera.close()

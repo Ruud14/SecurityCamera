@@ -1,5 +1,7 @@
 import tornado.web, tornado.ioloop, tornado.websocket
 
+
+# WebSocket for streaming to the web page.
 class WebSocketHandler(tornado.websocket.WebSocketHandler):
     connections = []
 
