@@ -18,7 +18,7 @@ class Detector:
         # Start recording to the detection buffer.
         self.camera.start_recording(
             self.detection_buffer,
-            splitter_port=2,
+            splitter_port=3,
             resize=self.detection_resolution,
             format='mjpeg'
         )

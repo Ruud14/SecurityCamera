@@ -38,12 +38,11 @@ class JSHandler(tornado.web.RequestHandler):
 
 # Class that is responsible for streaming the camera footage to the web-page.
 class Streamer:
-    def __init__(self, camera, streaming_resolution='1296x972', fps=15, port=8000, delayed_seconds=5):
+    def __init__(self, camera, streaming_resolution='1296x972', fps=15, port=8000):
         self.server_port = port
         self.server_ip = self._socket_setup()
         self.streaming_resolution = streaming_resolution
         self.fps = fps
-        self.delayed_seconds = delayed_seconds
         self.camera = camera
 
         self.request_handlers = None
@@ -73,7 +72,7 @@ class Streamer:
         self._setup_request_handlers()
         try:
             # Create the stream and detection buffers.
-            stream_buffer = StreamBuffer(self.camera, self.fps, self.delayed_seconds)
+            stream_buffer = StreamBuffer(self.camera, self.fps)
 
             # Start sending frames to the streaming thread.
             self.camera.start_recording(stream_buffer, **{

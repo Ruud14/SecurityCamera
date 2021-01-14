@@ -48,10 +48,12 @@ if __name__ == '__main__':
 
     recorder = Recorder(camera=camera,
                         sender=sender,
+                        fps=stream_fps,
                         video_output_folder=recordings_output_folder,
                         record_seconds_after_movement=record_seconds_after_movement,
                         max_recording_seconds=max_recording_seconds,
-                        storage_option=storage_option)
+                        storage_option=storage_option,
+                        delayed_seconds=delayed_seconds)
 
     detector = Detector(camera=camera,
                         recorder=recorder,
@@ -59,8 +61,7 @@ if __name__ == '__main__':
                         detection_resolution=detection_resolution)
 
     streamer = Streamer(camera=camera,
-                        fps=stream_fps,
-                        delayed_seconds=delayed_seconds)
+                        fps=stream_fps,)
     detector.start()
     streamer.start()
 
