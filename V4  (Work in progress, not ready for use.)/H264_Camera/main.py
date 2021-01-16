@@ -24,6 +24,17 @@ camera_vFlip = stored_data['camera_vFlip']
 camera_HFlip = stored_data['camera_hFlip']
 camera_denoise = stored_data['camera_denoise']
 detection_resolution = tuple(map(int, stored_data['detection_resolution'].split("x")))
+h264_stream_and_record_args = {
+    'format': 'h264',
+    #'bitrate': 25000000,
+    'quality': 25,
+    'profile': 'high',
+    'level': '4.2',
+    'intra_period': 15,
+    'intra_refresh': 'both',
+    'inline_headers': True,
+    'sps_timing': True
+}
 
 
 # Change the execution directory of the script.
@@ -48,7 +59,7 @@ if __name__ == '__main__':
 
     recorder = Recorder(camera=camera,
                         sender=sender,
-                        fps=stream_fps,
+                        h264_args=h264_stream_and_record_args,
                         video_output_folder=recordings_output_folder,
                         record_seconds_after_movement=record_seconds_after_movement,
                         max_recording_seconds=max_recording_seconds,
@@ -61,6 +72,7 @@ if __name__ == '__main__':
                         detection_resolution=detection_resolution)
 
     streamer = Streamer(camera=camera,
+                        h264_args=h264_stream_and_record_args,
                         fps=stream_fps,)
     detector.start()
     streamer.start()

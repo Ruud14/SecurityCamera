@@ -22,7 +22,6 @@ class Detector:
             resize=self.detection_resolution,
             format='mjpeg'
         )
-
         # Let the user know that the detector started successfully.
         print("Motion detector started successfully!")
 
@@ -45,6 +44,5 @@ class Detector:
 
         # Start recording when the difference between the frames is too big.
         if thresh.sum() > 100:
-            print("Movement detected!")
             # Report motion to the recorder so it can start recording.
             self.recorder.report_motion()

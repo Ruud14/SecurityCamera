@@ -1,5 +1,4 @@
-import tornado.web, tornado.ioloop, tornado.websocket  
-from picamera import PiCamera, PiVideoFrameType
+import tornado.web, tornado.ioloop, tornado.websocket
 from string import Template
 import socket
 from websockethandler import WebSocketHandler
@@ -38,12 +37,13 @@ class JSHandler(tornado.web.RequestHandler):
 
 # Class that is responsible for streaming the camera footage to the web-page.
 class Streamer:
-    def __init__(self, camera, streaming_resolution='1296x972', fps=15, port=8000):
+    def __init__(self, camera, h264_args, streaming_resolution='1296x972', fps=15, port=8000):
+        self.camera = camera
+        self.h264_args = h264_args
         self.server_port = port
         self.server_ip = self._socket_setup()
         self.streaming_resolution = streaming_resolution
         self.fps = fps
-        self.camera = camera
 
         self.request_handlers = None
         self.detection_buffer = None
@@ -75,17 +75,7 @@ class Streamer:
             stream_buffer = StreamBuffer(self.camera, self.fps)
 
             # Start sending frames to the streaming thread.
-            self.camera.start_recording(stream_buffer, **{
-                    'format': 'h264',
-                    #'bitrate': 25000000,
-                    'quality': 25,
-                    'profile': 'high',
-                    'level': '4.2',
-                    'intra_period': 15,
-                    'intra_refresh': 'both',
-                    'inline_headers': True,
-                    'sps_timing': True
-                })
+            self.camera.start_recording(stream_buffer, splitter_port=2, **self.h264_args)
 
             # Create and loop the tornado application.
             application = tornado.web.Application(self.request_handlers)
@@ -96,7 +86,7 @@ class Streamer:
             loop.start()
 
         except KeyboardInterrupt:
-            self.camera.stop_recording()
+            self.camera.stop_recording() #TODO: move this to main.
             self.camera.close()
             loop.stop()
 

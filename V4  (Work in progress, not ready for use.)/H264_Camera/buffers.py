@@ -1,6 +1,6 @@
 from websockethandler import WebSocketHandler
 from picamera import PiCamera, PiVideoFrameType
-import io, os, socket
+import io
 import cv2
 import numpy as np
 
@@ -59,44 +59,3 @@ class DetectionBuffer(object):
             self.buffer.seek(0)
 
         return self.buffer.write(buf)
-
-
-# Buffer for the live camera feed.
-class RecordingBuffer(object):
-    def __init__(self, camera, fps, delayed_seconds):
-        self.frameTypes = PiVideoFrameType()
-        self.loop = None
-        self.buffer = io.BytesIO()
-        self.camera = camera
-        self.fps = fps
-        self.delayed_seconds = delayed_seconds
-        self.frame = None
-        self.old_frames = []
-
-    def setLoop(self, loop):
-        self.loop = loop
-
-    def write(self, buf):
-        if self.camera.frame.complete and self.camera.frame.frame_type != self.frameTypes.sps_header:
-            self.buffer.write(buf)
-            self.frame = self.buffer.getvalue()
-
-            # Collect delayed frames.
-            if len(self.old_frames) <= self.delayed_seconds * self.fps:
-                self.old_frames.append(self.frame)
-            else:
-                del self.old_frames[0]
-                self.old_frames.append(self.frame)
-
-            # record self.frame
-
-            self.buffer.seek(0)
-            self.buffer.truncate()
-        else:
-            self.buffer.write(buf)
-
-    def start_recording(self, file_path):
-        print("Started recording {}".format(file_path))
-
-    def stop_recording(self):
-        print("Stopped recording")
