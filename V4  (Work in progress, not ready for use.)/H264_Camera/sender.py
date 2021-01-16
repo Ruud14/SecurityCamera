@@ -37,3 +37,5 @@ class Sender:
             s.close()
             os.remove(filepath)
             print("File Removed")
+        else:
+            print(filepath + " Does not exist.")

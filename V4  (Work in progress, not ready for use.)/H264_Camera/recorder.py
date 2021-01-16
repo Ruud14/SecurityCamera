@@ -76,8 +76,7 @@ class Recorder:
         self._put_in_mp4_container(output_file_name)
 
         if self.storage_option != "local":
-            print("Sending {} to {}".format(output_file_name, self.storage_option))
-            # threading.Thread(target=self.sender.send_recording, args=(file_path,)).start()
+            threading.Thread(target=self.sender.send_recording, args=(output_file_name+".mp4",)).start()
 
     # Merge the two h264 recordings and delete the old h264 files.
     def _merge_recordings(self, output_file_name):
@@ -96,7 +95,7 @@ class Recorder:
     # Put the h264 recording into an mp4 container.
     def _put_in_mp4_container(self, output_file_name):
         # ffmpeg -i "before.h264" -c:v copy -f mp4 "myOutputFile.mp4"
-        subprocess.Popen(['ffmpeg', '-i', '{}'.format(output_file_name+".h264"), '-c:v', 'copy', '-f',
+        subprocess.call(['ffmpeg', '-i', '{}'.format(output_file_name+".h264"), '-c:v', 'copy', '-f',
                           'mp4', '{}'.format(output_file_name+".mp4")], stdin=subprocess.PIPE)
         # Remove h264 file
         try:

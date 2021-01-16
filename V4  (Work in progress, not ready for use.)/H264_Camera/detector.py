@@ -4,16 +4,15 @@ from buffers import DetectionBuffer
 
 # Class that handles the detection of motion in the live camera feed.
 class Detector:
-    def __init__(self, camera, recorder, sensitivity=25, detection_resolution=(80,46)):
-
-        # The sensitivity. Higher number = less detection.
-        self.motion_sensitivity = sensitivity
+    def __init__(self, camera, recorder, motion_threshold=25, detection_resolution=(80,46)):
         self.camera = camera
-        self.detection_resolution = detection_resolution
-        # Create the recorder
         self.recorder = recorder
+        # The motion threshold. Higher number = less detection.
+        self.motion_threshold = motion_threshold
+        self.detection_resolution = detection_resolution
         self.detection_buffer = DetectionBuffer(self.detect_motion)
 
+    # Start the detector.
     def start(self):
         # Start recording to the detection buffer.
         self.camera.start_recording(
@@ -40,7 +39,7 @@ class Detector:
 
         # Calculate the difference between the current and previous frame.
         frame_difference = cv2.absdiff(next_frame, start_frame)
-        thresh = cv2.threshold(frame_difference, self.motion_sensitivity, 255, cv2.THRESH_BINARY)[1]
+        thresh = cv2.threshold(frame_difference, self.motion_threshold, 255, cv2.THRESH_BINARY)[1]
 
         # Start recording when the difference between the frames is too big.
         if thresh.sum() > 100:

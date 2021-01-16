@@ -12,9 +12,9 @@ config_file_path = '/home/pi/scripts/pi-h264-to-browser/src/config.json'
 with open(config_file_path) as file:
     stored_data = json.loads(file.read())
 
-detection_sensitivity = stored_data["detection_sensitivity"]
+motion_threshold = stored_data["detector_motion_threshold"]
 delayed_seconds = stored_data["delayed_seconds"]
-stream_resolution = stored_data["stream_resolution"]
+stream_resolution = stored_data["stream_and_record_resolution"]
 stream_fps = stored_data["stream_fps"]
 recordings_output_folder = stored_data['local_recordings_output_folder']
 record_seconds_after_movement = stored_data['record_seconds_after_movement']
@@ -50,7 +50,7 @@ if __name__ == '__main__':
     change_exec_dir()
 
     # Create and configure the camera.
-    camera = PiCamera(sensor_mode=4, resolution=stream_resolution, framerate=stream_fps)
+    camera = PiCamera(resolution=stream_resolution, framerate=stream_fps)
     camera.vflip = camera_vFlip
     camera.hflip = camera_HFlip
     camera.video_denoise = camera_denoise
@@ -68,7 +68,7 @@ if __name__ == '__main__':
 
     detector = Detector(camera=camera,
                         recorder=recorder,
-                        sensitivity=detection_sensitivity,
+                        motion_threshold=motion_threshold,
                         detection_resolution=detection_resolution)
 
     streamer = Streamer(camera=camera,

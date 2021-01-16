@@ -7,32 +7,11 @@ import time
 
 
 # function the get the content of a file.
-def get_file(filePath):
-    file = open(filePath, 'r')
+def get_file_content(file_path):
+    file = open(file_path, 'r')
     content = file.read()
     file.close()
     return content
-
-
-# Function to substitute content into the template.
-def templatize(content, replacements):
-    template = Template(content)
-    return template.substitute(replacements)
-
-
-appHtml = None
-
-
-# Handler for the html of the streaming page.
-class HTMLHandler(tornado.web.RequestHandler):
-    def get(self):
-        self.write(appHtml)
-
-
-# Handler for the javascript of the streaming page.
-class JSHandler(tornado.web.RequestHandler):
-    def get(self):
-        self.write(get_file('jmuxer.min.js'))
 
 
 # Class that is responsible for streaming the camera footage to the web-page.
@@ -40,25 +19,34 @@ class Streamer:
     def __init__(self, camera, h264_args, streaming_resolution='1296x972', fps=15, port=8000):
         self.camera = camera
         self.h264_args = h264_args
-        self.server_port = port
-        self.server_ip = self._socket_setup()
         self.streaming_resolution = streaming_resolution
         self.fps = fps
+        self.server_port = port
+        self.server_ip = self._socket_setup()
 
         self.request_handlers = None
-        self.detection_buffer = None
 
     # Set up the request handlers for tornado.
     def _setup_request_handlers(self):
+        parent = self
+
+        # Handler for the html of the streaming page.
+        class HTMLHandler(tornado.web.RequestHandler):
+            def get(self):
+                self.write(Template(get_file_content('index.html')).substitute({'ip': parent.server_ip, 'port': parent.server_port, 'fps': parent.fps}))
+
+        # Handler for the javascript of the streaming page.
+        class JSHandler(tornado.web.RequestHandler):
+            def get(self):
+                self.write(get_file_content('jmuxer.min.js'))
+
         self.request_handlers = [
             (r"/ws/", WebSocketHandler),
             (r"/", HTMLHandler),
+            (r"/index.html", HTMLHandler),
             (r"/jmuxer.min.js", JSHandler),
             (r"/delayed/jmuxer.min.js", JSHandler)
         ]
-        global appHtml
-        appHtml = templatize(get_file('index.html'),
-                                   {'ip': self.server_ip, 'port': self.server_port, 'fps': self.fps})
 
     # Set up the web socket.
     def _socket_setup(self):
@@ -72,7 +60,7 @@ class Streamer:
         self._setup_request_handlers()
         try:
             # Create the stream and detection buffers.
-            stream_buffer = StreamBuffer(self.camera, self.fps)
+            stream_buffer = StreamBuffer(self.camera)
 
             # Start sending frames to the streaming thread.
             self.camera.start_recording(stream_buffer, splitter_port=2, **self.h264_args)
@@ -89,9 +77,3 @@ class Streamer:
             self.camera.stop_recording() #TODO: move this to main.
             self.camera.close()
             loop.stop()
-
-    # return the detection_buffer to the detector.
-    def get_detection_buffer(self):
-        while not self.detection_buffer:
-            time.sleep(0.01)
-        return self.detection_buffer
