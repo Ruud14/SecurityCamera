@@ -1,8 +1,8 @@
 from websockethandler import WebSocketHandler
 from picamera import PiCamera, PiVideoFrameType
-import io
-import cv2
 import numpy as np
+import cv2
+import io
 
 
 # Buffer for the live camera feed.
@@ -18,9 +18,9 @@ class StreamBuffer(object):
     def write(self, buf):
         if self.camera.frame.complete and self.camera.frame.frame_type != PiVideoFrameType().sps_header:
             self.buffer.write(buf)
-
+            frame = self.buffer.getvalue()
             if self.loop is not None and WebSocketHandler.hasConnections():
-                self.loop.add_callback(callback=WebSocketHandler.broadcast, message=self.buffer.getvalue())
+                self.loop.add_callback(callback=WebSocketHandler.broadcast, message=frame)
 
             self.buffer.seek(0)
             self.buffer.truncate()

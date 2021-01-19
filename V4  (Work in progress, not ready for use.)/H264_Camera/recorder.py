@@ -1,9 +1,9 @@
-import datetime
+from picamera import PiCamera, PiCameraCircularIO
 import subprocess
 import threading
+import datetime
 import time
 import os
-from picamera import PiCamera, PiCameraCircularIO
 
 stored_data = None
 
@@ -11,7 +11,7 @@ stored_data = None
 # Class that handles the recording.
 class Recorder:
     def __init__(self, camera, sender, h264_args, video_output_folder="./recordings/", record_seconds_after_movement=12,
-                 max_recording_seconds=300, storage_option='local', delayed_seconds=5):
+                 max_recording_seconds=300, storage_option='local', delayed_seconds=5, path_to_ffmpeg="/usr/local/bin/ffmpeg"):
         self.camera = camera
         self.sender = sender
         self.h264_args = h264_args
@@ -21,6 +21,7 @@ class Recorder:
         self.storage_option = storage_option
         self.timer = 0
         self.delayed_seconds = delayed_seconds
+        self.path_to_ffmpeg = path_to_ffmpeg
 
         # Make sure PiCameraCircularIO contains at least 20 seconds of footage. Since this is the minimum for it work.
         if delayed_seconds > 20:
@@ -95,8 +96,8 @@ class Recorder:
     # Put the h264 recording into an mp4 container.
     def _put_in_mp4_container(self, output_file_name):
         # ffmpeg -i "before.h264" -c:v copy -f mp4 "myOutputFile.mp4"
-        subprocess.call(['ffmpeg', '-i', '{}'.format(output_file_name+".h264"), '-c:v', 'copy', '-f',
-                          'mp4', '{}'.format(output_file_name+".mp4")], stdin=subprocess.PIPE)
+        subprocess.call(['{}'.format(self.path_to_ffmpeg), '-i', '{}'.format(output_file_name+".h264"), '-c:v', 'copy',
+                         '-f', 'mp4', '{}'.format(output_file_name+".mp4")], stdin=subprocess.PIPE)
         # Remove h264 file
         try:
             os.remove(output_file_name + ".h264")

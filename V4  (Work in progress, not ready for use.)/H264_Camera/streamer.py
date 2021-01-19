@@ -1,14 +1,16 @@
 import tornado.web, tornado.ioloop, tornado.websocket
-from string import Template
-import socket
 from websockethandler import WebSocketHandler
 from buffers import StreamBuffer
-import time
+from string import Template
+import socket
+import os
 
 
 # function the get the content of a file.
-def get_file_content(file_path):
-    file = open(file_path, 'r')
+def get_file_content(relative_file_path):
+    abspath = os.path.abspath(__file__)
+    directory_name = os.path.dirname(abspath)
+    file = open(os.path.join(directory_name, relative_file_path), 'r')
     content = file.read()
     file.close()
     return content
@@ -33,19 +35,25 @@ class Streamer:
         # Handler for the html of the streaming page.
         class HTMLHandler(tornado.web.RequestHandler):
             def get(self):
-                self.write(Template(get_file_content('index.html')).substitute({'ip': parent.server_ip, 'port': parent.server_port, 'fps': parent.fps}))
+                self.write(Template(get_file_content('web/index.html')).substitute({'ip': parent.server_ip, 'port': parent.server_port, 'fps': parent.fps}))
+
+        # Handler for the javascript of the h264 muxer.
+        class JMuxerHandler(tornado.web.RequestHandler):
+            def get(self):
+                self.write(get_file_content('web/jmuxer.min.js'))
 
         # Handler for the javascript of the streaming page.
         class JSHandler(tornado.web.RequestHandler):
             def get(self):
-                self.write(get_file_content('jmuxer.min.js'))
+                self.write(Template(get_file_content('web/index.js')).substitute({'ip': parent.server_ip, 'port': parent.server_port, 'fps': parent.fps}))
 
         self.request_handlers = [
             (r"/ws/", WebSocketHandler),
             (r"/", HTMLHandler),
             (r"/index.html", HTMLHandler),
-            (r"/jmuxer.min.js", JSHandler),
-            (r"/delayed/jmuxer.min.js", JSHandler)
+            (r"/jmuxer.min.js", JMuxerHandler),
+            (r"/index.js", JSHandler),
+            (r"/(.*)", tornado.web.StaticFileHandler, {"path":r"./web/static/"})
         ]
 
     # Set up the web socket.
@@ -63,7 +71,7 @@ class Streamer:
             stream_buffer = StreamBuffer(self.camera)
 
             # Start sending frames to the streaming thread.
-            self.camera.start_recording(stream_buffer, splitter_port=2, **self.h264_args)
+            self.camera.start_recording(stream_buffer, splitter_port=2, **self.h264_args, resize=self.streaming_resolution)
 
             # Create and loop the tornado application.
             application = tornado.web.Application(self.request_handlers)

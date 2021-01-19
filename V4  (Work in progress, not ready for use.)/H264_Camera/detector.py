@@ -1,5 +1,5 @@
-import cv2
 from buffers import DetectionBuffer
+import cv2
 
 
 # Class that handles the detection of motion in the live camera feed.
