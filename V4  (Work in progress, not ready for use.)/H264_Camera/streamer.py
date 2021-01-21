@@ -6,10 +6,16 @@ import socket
 import os
 
 
-# function the get the content of a file.
-def get_file_content(relative_file_path):
+# Returns the full file path of the script.
+def get_exec_dir():
     abspath = os.path.abspath(__file__)
     directory_name = os.path.dirname(abspath)
+    return directory_name
+
+
+# function the get the content of a file.
+def get_file_content(relative_file_path):
+    directory_name = get_exec_dir()
     file = open(os.path.join(directory_name, relative_file_path), 'r')
     content = file.read()
     file.close()
@@ -32,16 +38,6 @@ class Streamer:
     def _setup_request_handlers(self):
         parent = self
 
-        # Handler for the html of the streaming page.
-        class HTMLHandler(tornado.web.RequestHandler):
-            def get(self):
-                self.write(Template(get_file_content('web/index.html')).substitute({'ip': parent.server_ip, 'port': parent.server_port, 'fps': parent.fps}))
-
-        # Handler for the javascript of the h264 muxer.
-        class JMuxerHandler(tornado.web.RequestHandler):
-            def get(self):
-                self.write(get_file_content('web/jmuxer.min.js'))
-
         # Handler for the javascript of the streaming page.
         class JSHandler(tornado.web.RequestHandler):
             def get(self):
@@ -49,11 +45,8 @@ class Streamer:
 
         self.request_handlers = [
             (r"/ws/", WebSocketHandler),
-            (r"/", HTMLHandler),
-            (r"/index.html", HTMLHandler),
-            (r"/jmuxer.min.js", JMuxerHandler),
             (r"/index.js", JSHandler),
-            (r"/(.*)", tornado.web.StaticFileHandler, {"path":r"./web/static/"})
+            (r"/(.*)", tornado.web.StaticFileHandler, {"path": os.path.join(get_exec_dir(), "web/static/")})
         ]
 
     # Set up the web socket.
