@@ -11,7 +11,15 @@ import json
 MAX_INTERNET_CONNECT_ATTEMPTS = 100
 current_internet_connect_attempts = 0
 
-with open("config.json") as file:
+
+# Returns the full file path of the script.
+def get_exec_dir():
+    abspath = os.path.abspath(__file__)
+    directory_name = os.path.dirname(abspath)
+    return directory_name
+
+
+with open(os.path.join(get_exec_dir(),"config.json")) as file:
     stored_data = json.loads(file.read())
     video_output_folder = stored_data['video_output_folder']
     max_storage = stored_data['max_storage_capacity']

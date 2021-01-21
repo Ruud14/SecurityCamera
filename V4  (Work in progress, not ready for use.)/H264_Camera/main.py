@@ -71,51 +71,65 @@ if __name__ == '__main__':
     with open(config_file_path) as file:
         stored_data = json.loads(file.read())
 
-    motion_threshold = stored_data["detector_motion_threshold"]
-    delayed_seconds = stored_data["delayed_seconds"]
-    record_resolution = stored_data["record_resolution"]
-    stream_resolution = stored_data["stream_resolution"]
-    stream_fps = stored_data["stream_fps"]
-    recordings_output_path = stored_data['local_recordings_output_path']
-    ffmpeg_path = stored_data['ffmpeg_path']
-    record_seconds_after_movement = stored_data['record_seconds_after_movement']
-    max_recording_seconds = stored_data['max_recording_seconds']
-    storage_option = stored_data['storage_option']
+    streamer_active = stored_data["streamer_active"]
+    recorder_active = stored_data["recorder_active"]
+
+    if not streamer_active and not recorder_active:
+        raise Exception("Did you forget to enable the streamer and/or recorder in config.json?")
+
+    camera_fps = stored_data["camera_fps"]
+    camera_resolution = stored_data["camera_resolution"]
     camera_vFlip = stored_data['camera_vFlip']
     camera_HFlip = stored_data['camera_hFlip']
     camera_denoise = stored_data['camera_denoise']
-    detection_resolution = tuple(map(int, stored_data['detection_resolution'].split("x")))
-    convert_h264_to_mp4 = stored_data['convert_h264_to_mp4']
 
     # Create and configure the camera.
-    camera = PiCamera(resolution=record_resolution, framerate=stream_fps)
+    camera = PiCamera(resolution=camera_resolution, framerate=camera_fps)
     camera.vflip = camera_vFlip
     camera.hflip = camera_HFlip
     camera.video_denoise = camera_denoise
 
-    sender = Sender(storage_ip=storage_option)
+    # Start the recorder.
+    if recorder_active:
+        motion_threshold = stored_data["detector_motion_threshold"]
+        delayed_seconds = stored_data["delayed_seconds"]
+        recordings_output_path = stored_data['local_recordings_output_path']
+        ffmpeg_path = stored_data['ffmpeg_path']
+        record_seconds_after_movement = stored_data['record_seconds_after_movement']
+        max_recording_seconds = stored_data['max_recording_seconds']
+        storage_option = stored_data['storage_option']
 
-    recorder = Recorder(camera=camera,
-                        sender=sender,
-                        h264_args=h264_stream_and_record_args,
-                        video_output_folder=recordings_output_path,
-                        record_seconds_after_movement=record_seconds_after_movement,
-                        max_recording_seconds=max_recording_seconds,
-                        storage_option=storage_option,
-                        delayed_seconds=delayed_seconds,
-                        ffmpeg_path=ffmpeg_path,
-                        convert_h264_to_mp4=convert_h264_to_mp4)
+        detection_resolution = tuple(map(int, stored_data['detection_resolution'].split("x")))
+        convert_h264_to_mp4 = stored_data['convert_h264_to_mp4']
 
-    detector = Detector(camera=camera,
-                        recorder=recorder,
-                        motion_threshold=motion_threshold,
-                        detection_resolution=detection_resolution)
+        sender = Sender(storage_ip=storage_option)
 
-    streamer = Streamer(camera=camera,
-                        streaming_resolution=stream_resolution,
-                        h264_args=h264_stream_and_record_args,
-                        fps=stream_fps,)
-    detector.start()
-    streamer.start()
+        recorder = Recorder(camera=camera,
+                            sender=sender,
+                            h264_args=h264_stream_and_record_args,
+                            video_output_folder=recordings_output_path,
+                            record_seconds_after_movement=record_seconds_after_movement,
+                            max_recording_seconds=max_recording_seconds,
+                            storage_option=storage_option,
+                            delayed_seconds=delayed_seconds,
+                            ffmpeg_path=ffmpeg_path,
+                            convert_h264_to_mp4=convert_h264_to_mp4)
 
+        detector = Detector(camera=camera,
+                            recorder=recorder,
+                            motion_threshold=motion_threshold,
+                            detection_resolution=detection_resolution)
 
+        detector.start()
+        if not streamer_active:
+            while True:
+                time.sleep(1)
+
+    # Start the streamer.
+    if streamer_active:
+        stream_resolution = stored_data["stream_resolution"]
+        streamer = Streamer(camera=camera,
+                            streaming_resolution=stream_resolution,
+                            h264_args=h264_stream_and_record_args,
+                            fps=camera_fps, )
+        streamer.start()
