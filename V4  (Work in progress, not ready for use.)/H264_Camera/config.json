@@ -2,7 +2,7 @@
   "detector_motion_threshold": 20,
   "delayed_seconds": 5,
   "local_recordings_output_path": "/home/pi/recordings",
-  "path_to_ffmpeg": "/usr/local/bin/ffmpeg",
+  "ffmpeg_path": "/usr/local/bin/ffmpeg",
   "record_seconds_after_movement": 12,
   "max_recording_seconds": 300,
   "storage_option": "192.168.178.80",
@@ -12,5 +12,6 @@
   "stream_fps": 15,
   "camera_vFlip": false,
   "camera_hFlip": false,
-  "camera_denoise": true
+  "camera_denoise": true,
+  "convert_h264_to_mp4": false
 }

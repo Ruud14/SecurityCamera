@@ -10,8 +10,9 @@ stored_data = None
 
 # Class that handles the recording.
 class Recorder:
-    def __init__(self, camera, sender, h264_args, video_output_folder="./recordings/", record_seconds_after_movement=12,
-                 max_recording_seconds=300, storage_option='local', delayed_seconds=5, path_to_ffmpeg="/usr/local/bin/ffmpeg"):
+    def __init__(self, camera, sender, h264_args, video_output_folder="./recordings/",
+                 record_seconds_after_movement=12, max_recording_seconds=300, storage_option='local',
+                 delayed_seconds=5, ffmpeg_path="/usr/local/bin/ffmpeg", convert_h264_to_mp4=True):
         self.camera = camera
         self.sender = sender
         self.h264_args = h264_args
@@ -21,7 +22,8 @@ class Recorder:
         self.storage_option = storage_option
         self.timer = 0
         self.delayed_seconds = delayed_seconds
-        self.path_to_ffmpeg = path_to_ffmpeg
+        self.ffmpeg_path = ffmpeg_path
+        self.convert_h264_to_mp4 = convert_h264_to_mp4
 
         # Make sure PiCameraCircularIO contains at least 20 seconds of footage. Since this is the minimum for it work.
         if delayed_seconds > 20:
@@ -72,12 +74,13 @@ class Recorder:
         # split the recording back to the delayed frames stream.
         self.camera.split_recording(self.delayed_recording_stream, splitter_port=1)
         # Merge the two recordings.
-        self._merge_recordings(output_file_name)
+        file_path = self._merge_recordings(output_file_name)
         # Put the h264 recording into an mp4 container.
-        self._put_in_mp4_container(output_file_name)
+        if self.convert_h264_to_mp4:
+            file_path = self._put_in_mp4_container(file_path)
 
         if self.storage_option != "local":
-            threading.Thread(target=self.sender.send_recording, args=(output_file_name+".mp4",)).start()
+            threading.Thread(target=self.sender.send_recording, args=(file_path,)).start()
 
     # Merge the two h264 recordings and delete the old h264 files.
     def _merge_recordings(self, output_file_name):
@@ -92,14 +95,17 @@ class Recorder:
             os.remove(output_file_name+"_after.h264")
         except Exception as e:
             print(e)
+        return output_file_name+".h264"
 
     # Put the h264 recording into an mp4 container.
-    def _put_in_mp4_container(self, output_file_name):
+    def _put_in_mp4_container(self, file_path):
+        output_file_path = file_path.replace("h264", "mp4")
         # ffmpeg -i "before.h264" -c:v copy -f mp4 "myOutputFile.mp4"
-        subprocess.call(['{}'.format(self.path_to_ffmpeg), '-i', '{}'.format(output_file_name+".h264"), '-c:v', 'copy',
-                         '-f', 'mp4', '{}'.format(output_file_name+".mp4")], stdin=subprocess.PIPE)
+        subprocess.call(['{}'.format(self.ffmpeg_path), '-i', '{}'.format(file_path), '-c:v', 'copy',
+                         '-f', 'mp4', '{}'.format(output_file_path)], stdin=subprocess.PIPE)
         # Remove h264 file
         try:
-            os.remove(output_file_name + ".h264")
+            os.remove(file_path)
         except Exception as e:
             print(e)
+        return output_file_path

@@ -6,6 +6,11 @@ import os
 import sys
 import json
 
+# Maximum amount of attempts to connect to the internet.
+# Exit if this is exceeded.
+MAX_INTERNET_CONNECT_ATTEMPTS = 100
+current_internet_connect_attempts = 0
+
 with open("config.json") as file:
     stored_data = json.loads(file.read())
     video_output_folder = stored_data['video_output_folder']
@@ -14,6 +19,16 @@ with open("config.json") as file:
 # Change the slashes if the script is run on a windows device.
 if sys.platform.startswith("win"):
     video_output_folder = video_output_folder.replace("/", "\\")
+
+
+# Checks there is internet connectivity.
+def has_internet_connectivity(host="8.8.8.8", port=53):
+    try:
+        socket.socket().connect((host, port))
+        return True
+    except socket.error:
+        print("No internet connectivity could be established. Trying again in a second.")
+        return False
 
 
 # Sets up the socket and accepts clients.
@@ -104,4 +119,13 @@ def make_room():
 
 
 if __name__ == "__main__":
+
+    # Wait for internet connectivity.
+    while not has_internet_connectivity():
+        time.sleep(1)
+        current_internet_connect_attempts += 1
+        if current_internet_connect_attempts > 100:
+            raise socket.error("No internet connection could be established "
+                               "within the first {} seconds of running.".format(MAX_INTERNET_CONNECT_ATTEMPTS))
+
     main()

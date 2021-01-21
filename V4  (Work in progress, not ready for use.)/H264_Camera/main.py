@@ -77,7 +77,7 @@ if __name__ == '__main__':
     stream_resolution = stored_data["stream_resolution"]
     stream_fps = stored_data["stream_fps"]
     recordings_output_path = stored_data['local_recordings_output_path']
-    path_to_ffmpeg = stored_data['path_to_ffmpeg']
+    ffmpeg_path = stored_data['ffmpeg_path']
     record_seconds_after_movement = stored_data['record_seconds_after_movement']
     max_recording_seconds = stored_data['max_recording_seconds']
     storage_option = stored_data['storage_option']
@@ -85,6 +85,7 @@ if __name__ == '__main__':
     camera_HFlip = stored_data['camera_hFlip']
     camera_denoise = stored_data['camera_denoise']
     detection_resolution = tuple(map(int, stored_data['detection_resolution'].split("x")))
+    convert_h264_to_mp4 = stored_data['convert_h264_to_mp4']
 
     # Create and configure the camera.
     camera = PiCamera(resolution=record_resolution, framerate=stream_fps)
@@ -102,7 +103,8 @@ if __name__ == '__main__':
                         max_recording_seconds=max_recording_seconds,
                         storage_option=storage_option,
                         delayed_seconds=delayed_seconds,
-                        path_to_ffmpeg=path_to_ffmpeg)
+                        ffmpeg_path=ffmpeg_path,
+                        convert_h264_to_mp4=convert_h264_to_mp4)
 
     detector = Detector(camera=camera,
                         recorder=recorder,
