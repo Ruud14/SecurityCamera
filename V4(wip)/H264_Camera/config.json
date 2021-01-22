@@ -1,0 +1,27 @@
+{
+  "streamer_active": true,
+  "recorder_active": true,
+
+  "camera_resolution": "1600x1200",
+  "camera_fps": 15,
+  "camera_vFlip": false,
+  "camera_hFlip": false,
+  "camera_denoise": true,
+
+  "stream_resolution": "1296x972",
+
+  "detection_resolution": "80x46",
+  "detector_motion_threshold": 20,
+  "record_seconds_before_motion": 5,
+  "record_seconds_after_motion": 12,
+  "max_recording_seconds": 600,
+  "temporary_local_recordings_output_path": "/home/pi/temp_recordings",
+
+  "convert_h264_to_mp4": true,
+  "ffmpeg_path": "/usr/local/bin/ffmpeg",
+
+  "storage_option": "192.168.178.80",
+
+  "local_recordings_output_path": "/home/pi/recordings",
+  "max_local_storage_capacity": 25
+}
