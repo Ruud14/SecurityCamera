@@ -2,7 +2,7 @@ from streamer import Streamer
 from detector import Detector
 from recorder import Recorder
 from picamera import PiCamera
-from sender import Sender
+from storage import Storage
 import socket
 import json
 import time
@@ -92,26 +92,30 @@ if __name__ == '__main__':
     # Start the recorder.
     if recorder_active:
         motion_threshold = stored_data["detector_motion_threshold"]
-        delayed_seconds = stored_data["delayed_seconds"]
+        record_seconds_before_motion = stored_data["record_seconds_before_motion"]
         recordings_output_path = stored_data['local_recordings_output_path']
+        temporary_recordings_output_path = stored_data['temporary_local_recordings_output_path']
         ffmpeg_path = stored_data['ffmpeg_path']
-        record_seconds_after_movement = stored_data['record_seconds_after_movement']
+        record_seconds_after_motion = stored_data['record_seconds_after_motion']
         max_recording_seconds = stored_data['max_recording_seconds']
         storage_option = stored_data['storage_option']
+        max_local_storage_capacity = stored_data['max_local_storage_capacity']
 
         detection_resolution = tuple(map(int, stored_data['detection_resolution'].split("x")))
         convert_h264_to_mp4 = stored_data['convert_h264_to_mp4']
 
-        sender = Sender(storage_ip=storage_option)
+        storage = Storage(storage_option=storage_option,
+                          max_local_storage_capacity=max_local_storage_capacity,
+                          recordings_output_path=recordings_output_path,
+                          )
 
         recorder = Recorder(camera=camera,
-                            sender=sender,
+                            storage=storage,
                             h264_args=h264_stream_and_record_args,
-                            video_output_folder=recordings_output_path,
-                            record_seconds_after_movement=record_seconds_after_movement,
+                            temporary_recordings_output_path=temporary_recordings_output_path,
+                            record_seconds_after_motion=record_seconds_after_motion,
                             max_recording_seconds=max_recording_seconds,
-                            storage_option=storage_option,
-                            delayed_seconds=delayed_seconds,
+                            record_seconds_before_motion=record_seconds_before_motion,
                             ffmpeg_path=ffmpeg_path,
                             convert_h264_to_mp4=convert_h264_to_mp4)
 

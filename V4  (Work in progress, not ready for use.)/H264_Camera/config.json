@@ -8,14 +8,20 @@
   "camera_hFlip": false,
   "camera_denoise": true,
 
-  "detector_motion_threshold": 20,
-  "delayed_seconds": 5,
-  "local_recordings_output_path": "/home/pi/recordings",
-  "ffmpeg_path": "/usr/local/bin/ffmpeg",
-  "record_seconds_after_movement": 12,
-  "max_recording_seconds": 300,
-  "storage_option": "192.168.178.80",
   "stream_resolution": "1296x972",
+
   "detection_resolution": "80x46",
-  "convert_h264_to_mp4": true
+  "detector_motion_threshold": 20,
+  "record_seconds_before_motion": 5,
+  "record_seconds_after_motion": 12,
+  "max_recording_seconds": 600,
+  "temporary_local_recordings_output_path": "/home/pi/temp_recordings",
+
+  "convert_h264_to_mp4": true,
+  "ffmpeg_path": "/usr/local/bin/ffmpeg",
+
+  "storage_option": "192.168.178.80",
+
+  "local_recordings_output_path": "/home/pi/recordings",
+  "max_local_storage_capacity": 25
 }

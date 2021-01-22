@@ -60,23 +60,21 @@ def main():
 # Receives files from client 's'.
 def receive_recording(s):
     current_date = str(datetime.date.today())
+    rec_dir_path = os.path.join(video_output_folder, current_date)
     # Create a folder for the specific date if there isn't one already.
-    if not os.path.isdir(os.path.join(video_output_folder, current_date)):
-        os.mkdir(os.path.join(video_output_folder, current_date))
-
-    current_time = str(datetime.datetime.now())[11:13] + "-" + str(datetime.datetime.now())[14:16] + '-' + str(
-        datetime.datetime.now())[17:19]
+    if not os.path.isdir(rec_dir_path):
+        os.mkdir(rec_dir_path)
 
     data = s.recv(4096)
     data = data.decode()
     if data.startswith("EXISTS"):
-        file_type_container = data[6:16]
-        file_type = file_type_container.replace("_", "")
-        file_size = (data[16:])
+        file_name_container = data[6:261]
+        file_name = file_name_container.replace("_", "")
+        file_size = (data[261:])
         print("FileSize:", file_size)
         s.send(b'OK')
-        filepath = os.path.join(video_output_folder, current_date, current_time + ".{}".format(file_type))
-        f = open(filepath, 'wb')
+        file_path = os.path.join(video_output_folder, current_date, file_name)
+        f = open(file_path, 'wb')
         data = s.recv(4096)
         total_received = len(data)
         f.write(data)
@@ -85,7 +83,7 @@ def receive_recording(s):
             total_received += len(data)
             f.write(data)
         f.close()
-        print("download Complete!")
+        print("download of {} Complete!".format(file_path))
     else:
         print("File does not exist!")
     s.close()
@@ -106,7 +104,7 @@ def make_room():
                     fp = os.path.join(dirpath, f)
                     size += os.path.getsize(fp)
                     file_dict[fp] = os.path.getctime(fp)
-                # Remove directories if they are empty, they might get empty because of deleting files to save storage.
+                # Remove directories if they are empty, they might be empty because old recordings are deleted.
                 for dir in dirs:
                     if not os.listdir(os.path.join(dirpath, dir)):
                         os.rmdir(os.path.join(dirpath, dir))

@@ -10,24 +10,24 @@ stored_data = None
 
 # Class that handles the recording.
 class Recorder:
-    def __init__(self, camera, sender, h264_args, video_output_folder="./recordings/",
-                 record_seconds_after_movement=12, max_recording_seconds=300, storage_option='local',
-                 delayed_seconds=5, ffmpeg_path="/usr/local/bin/ffmpeg", convert_h264_to_mp4=True):
+    def __init__(self, camera, storage, h264_args,
+                 temporary_recordings_output_path="./temp_recordings/",
+                 record_seconds_after_motion=12, max_recording_seconds=300,
+                 record_seconds_before_motion=5, ffmpeg_path="/usr/local/bin/ffmpeg", convert_h264_to_mp4=True):
         self.camera = camera
-        self.sender = sender
+        self.storage = storage
         self.h264_args = h264_args
-        self.video_output_folder = video_output_folder
-        self.record_seconds_after_movement = record_seconds_after_movement
+        self.temporary_recordings_output_path = temporary_recordings_output_path
+        self.record_seconds_after_motion = record_seconds_after_motion
         self.max_recording_seconds = max_recording_seconds
-        self.storage_option = storage_option
         self.timer = 0
-        self.delayed_seconds = delayed_seconds
+        self.record_seconds_before_motion = record_seconds_before_motion
         self.ffmpeg_path = ffmpeg_path
         self.convert_h264_to_mp4 = convert_h264_to_mp4
 
         # Make sure PiCameraCircularIO contains at least 20 seconds of footage. Since this is the minimum for it work.
-        if delayed_seconds > 20:
-            delayed_storage_length_seconds = delayed_seconds
+        if record_seconds_before_motion > 20:
+            delayed_storage_length_seconds = record_seconds_before_motion
         else:
             delayed_storage_length_seconds = 20
         # Create the delayed frames stream.
@@ -40,23 +40,23 @@ class Recorder:
     # Extend the recording if the recording has already started.
     def report_motion(self):
         if self.timer == 0:
-            self.timer = self.record_seconds_after_movement
+            self.timer = self.record_seconds_after_motion
             self._start_recording()
         else:
-            self.timer = self.record_seconds_after_movement
+            self.timer = self.record_seconds_after_motion
 
     # Starts the recording.
     def _start_recording(self):
         # Create the filename and path.
         current_time_string = str(datetime.datetime.now())[11:13] + "-" + str(datetime.datetime.now())[14:16] \
                               + '-' + str(datetime.datetime.now())[17:19]
-        output_file_name = os.path.join(self.video_output_folder, current_time_string)
+        output_file_name = os.path.join(self.temporary_recordings_output_path, current_time_string)
         print('Started recording '+output_file_name)
 
         # record the frames "after" motion
         self.camera.split_recording(output_file_name+'_after.h264', splitter_port=1, seconds=10)
         # Write the 10 seconds "before" motion to disk as well
-        self.delayed_recording_stream.copy_to(output_file_name+'_before.h264', seconds=self.delayed_seconds)
+        self.delayed_recording_stream.copy_to(output_file_name+'_before.h264', seconds=self.record_seconds_before_motion)
         # Clear the delayed recording stream.
         self.delayed_recording_stream.clear()
 
@@ -65,7 +65,7 @@ class Recorder:
     # Starts counting down from record_seconds_after_movement after movement is detected.
     # Stop recording if the timer gets to 0.
     def _start_countdown(self, output_file_name):
-        self.timer = self.record_seconds_after_movement
+        self.timer = self.record_seconds_after_motion
         recorded_time = 0
         while self.timer > 0 and not recorded_time > self.max_recording_seconds:
             time.sleep(1)
@@ -78,9 +78,8 @@ class Recorder:
         # Put the h264 recording into an mp4 container.
         if self.convert_h264_to_mp4:
             file_path = self._put_in_mp4_container(file_path)
-
-        if self.storage_option != "local":
-            threading.Thread(target=self.sender.send_recording, args=(file_path,)).start()
+        # Store the recording in the right place.
+        self.storage.store(file_path)
 
     # Merge the two h264 recordings and delete the old h264 files.
     def _merge_recordings(self, output_file_name):
