@@ -60,7 +60,7 @@ def main():
 # Receives files from client 's'.
 def receive_recording(s):
     current_date = str(datetime.date.today())
-    rec_dir_path = os.path.join(video_output_folder, current_date)
+    rec_dir_path = os.path.join(get_exec_dir(), video_output_folder, current_date)
     # Create a folder for the specific date if there isn't one already.
     if not os.path.isdir(rec_dir_path):
         os.mkdir(rec_dir_path)
@@ -73,7 +73,7 @@ def receive_recording(s):
         file_size = (data[261:])
         print("FileSize:", file_size)
         s.send(b'OK')
-        file_path = os.path.join(video_output_folder, current_date, file_name)
+        file_path = os.path.join(get_exec_dir(), video_output_folder, current_date, file_name)
         f = open(file_path, 'wb')
         data = s.recv(4096)
         total_received = len(data)
@@ -110,7 +110,7 @@ def make_room():
                         os.rmdir(os.path.join(dirpath, dir))
             return size
 
-        folder_size = calc_folder_size(video_output_folder)
+        folder_size = calc_folder_size(os.path.join(get_exec_dir(), video_output_folder))
         # Sort the files based on the ctime.
         files = sorted(file_dict.items(), key=lambda x: x[1])
 

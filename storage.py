@@ -1,3 +1,4 @@
+from general import get_exec_dir
 import threading
 import datetime
 import socket
@@ -26,7 +27,10 @@ class Storage:
     def _store_recording(self, file_path):
         current_date = str(datetime.date.today())
         file_name = file_path.split("/")[-1]
-        rec_dir_path = os.path.join(self.recordings_output_path, current_date)
+        if not os.path.isdir(os.path.join(get_exec_dir(), self.recordings_output_path)):
+            os.mkdir(self.recordings_output_path)
+
+        rec_dir_path = os.path.join(get_exec_dir(), self.recordings_output_path, current_date)
         # Create a folder for the specific date if there isn't one already.
         if not os.path.isdir(rec_dir_path):
             os.mkdir(rec_dir_path)

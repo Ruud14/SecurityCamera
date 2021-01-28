@@ -49,6 +49,8 @@ class Recorder:
         # Create the filename and path.
         current_time_string = str(datetime.datetime.now())[11:13] + "-" + str(datetime.datetime.now())[14:16] \
                               + '-' + str(datetime.datetime.now())[17:19]
+        if not os.path.isdir(os.path.join(get_exec_dir(), self.temporary_recordings_output_path)):
+            os.mkdir(self.temporary_recordings_output_path)
         output_file_name = os.path.join(get_exec_dir(), self.temporary_recordings_output_path, current_time_string)
         print('Started recording '+output_file_name)
 
