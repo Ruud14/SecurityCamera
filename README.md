@@ -12,9 +12,9 @@ Confirmed working on Raspberry Pi 3b, 3b+, 4. Other versions will probably work,
 ### Features
 
 
-| Feature       |           Shortcut                 |
+| Feature       |                       |
 | ------------- |:-------------                                                                                                       |
-| - Live low-bandwidth **H.264 Streaming** to a local web page.          |       See Here        
+| - Live low-bandwidth **H.264 Streaming** to a local web page.          |       
 | - Advanced **motion detection** system that **records H.264 .mp4 videos** when motion is detected.               |
 | - Even frames from before the motion triggering event are recorded, so everything will be on video.              |
 | - Detection sensitivity, recording length, and much more is all easily user configurable.           |
