@@ -28,7 +28,7 @@ class Storage:
         current_date = str(datetime.date.today())
         file_name = file_path.split("/")[-1]
         if not os.path.isdir(os.path.join(get_exec_dir(), self.recordings_output_path)):
-            os.mkdir(self.recordings_output_path)
+            os.mkdir(os.path.join(get_exec_dir(), self.recordings_output_path))
 
         rec_dir_path = os.path.join(get_exec_dir(), self.recordings_output_path, current_date)
         # Create a folder for the specific date if there isn't one already.
