@@ -16,13 +16,13 @@
   "record_seconds_before_motion": 5,
   "record_seconds_after_motion": 12,
   "max_recording_seconds": 600,
-  "temporary_local_recordings_output_path": "/home/pi/temp_recordings",
+  "temporary_local_recordings_output_path": "./temp_recordings/",
 
   "convert_h264_to_mp4": true,
   "ffmpeg_path": "/usr/local/bin/ffmpeg",
 
-  "storage_option": "192.168.178.80",
+  "storage_option": "local",
 
-  "local_recordings_output_path": "/home/pi/recordings",
+  "local_recordings_output_path": "./recordings/",
   "max_local_storage_capacity": 25
 }
