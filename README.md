@@ -27,15 +27,16 @@ Confirmed working on Raspberry Pi 3b, 3b+, 4. Other versions will probably work,
 
 ### Installation guide
 - [Install the Raspberry Pi OS on your Raspberry Pi.](https://www.raspberrypi.org/software/)
+*On the Raspberry Pi:*
 - Connect the camera and enable it in the `sudo raspi-config` menu.
 - Install OpenCV by running the following commands:
   - `sudo apt update`
   - `sudo apt install python3-opencv`
   - To verify the installation, import the cv2 module and print the OpenCV version:
-    - `python3 -c "import cv2; print(cv2.__version__)`
+    - `python3 -c "import cv2; print(cv2.__version__)"`
   - If this outputs a version higher or equal to `3.0.0` you are good to go.
 - [Install ffmpeg with h.264 support](http://jollejolles.com/installing-ffmpeg-with-h264-support-on-raspberry-pi/).
-- Clone this repository:
+- Clone this repository (You might need to install git first: `sudo apt install git`):
   - `cd ~`
   - `git clone https://github.com/Ruud14/SecurityCamera.git`
   
