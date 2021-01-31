@@ -1,6 +1,6 @@
-# Raspberry Pi (Zero W) security camera system.
-
-Project status: finished, but nowhere near perfect.
+# These versions are all outdated. I strongly recommend you to use the [new vesion](https://github.com/Ruud14/SecurityCamera) instead!
+<br>
+<br>
 
 **Raspberry Pi Zero W security camera system.**
 
