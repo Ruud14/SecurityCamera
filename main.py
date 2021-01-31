@@ -15,7 +15,6 @@ import os
 # Maximum amount of attempts to connect to the internet.
 # Exit if this is exceeded.
 MAX_INTERNET_CONNECT_ATTEMPTS = 100
-current_internet_connect_attempts = 0
 
 # H262 configuration
 h264_stream_and_record_args = {
@@ -31,6 +30,16 @@ h264_stream_and_record_args = {
 }
 
 
+def wait_for_internet():
+    current_internet_connect_attempts = 0
+    while not has_internet_connectivity():
+        time.sleep(1)
+        current_internet_connect_attempts += 1
+        if current_internet_connect_attempts > 100:
+            raise socket.error("No internet connection could be established "
+                               "within the first {} seconds of running.".format(MAX_INTERNET_CONNECT_ATTEMPTS))
+
+
 # Run if this script is run on its own.
 if __name__ == '__main__':
     # Get the path of the configuration file.
@@ -44,14 +53,6 @@ if __name__ == '__main__':
         raise FileNotFoundError("The configuration file can't be found at {}. "
                                 "Use 'python3 main.py <PATH_TO_CONFIG_FILE>' "
                                 "to use a configuration file from a different directory.".format(config_file_path))
-
-    # Wait for internet connectivity.
-    while not has_internet_connectivity():
-        time.sleep(1)
-        current_internet_connect_attempts += 1
-        if current_internet_connect_attempts > 100:
-            raise socket.error("No internet connection could be established "
-                               "within the first {} seconds of running.".format(MAX_INTERNET_CONNECT_ATTEMPTS))
 
     # Get the configuration data from the config file.
     with open(config_file_path) as file:
@@ -102,6 +103,9 @@ if __name__ == '__main__':
         detection_resolution = tuple(map(int, stored_data['detection_resolution'].split("x")))
         convert_h264_to_mp4 = stored_data['convert_h264_to_mp4']
 
+        if storage_option != 'local':
+            wait_for_internet()
+
         storage = Storage(storage_option=storage_option,
                           max_local_storage_capacity=max_local_storage_capacity,
                           recordings_output_path=recordings_output_path,
@@ -133,6 +137,7 @@ if __name__ == '__main__':
 
     # Start the streamer.
     if streamer_active:
+        wait_for_internet()
         stream_resolution = stored_data["stream_resolution"]
         streamer = Streamer(camera=camera,
                             streaming_resolution=stream_resolution,
