@@ -35,7 +35,7 @@ Confirmed working on Raspberry Pi 3b, 3b+, 4. Other versions will probably work,
   - To verify the installation, import the cv2 module and print the OpenCV version:
     - `python3 -c "import cv2; print(cv2.__version__)"`
   - If this outputs a version higher or equal to `3.0.0` you are good to go.
-- [Install ffmpeg with h.264 support](http://jollejolles.com/installing-ffmpeg-with-h264-support-on-raspberry-pi/).
+- [Install ffmpeg with h.264 support](http://jollejolles.com/installing-ffmpeg-with-h264-support-on-raspberry-pi/). (This step is only neccessary if you want the recordings to be in h264 .mp4 format.)
 - Clone this repository (You might need to install git first: `sudo apt install git`):
   - `cd ~`
   - `git clone https://github.com/Ruud14/SecurityCamera.git`
