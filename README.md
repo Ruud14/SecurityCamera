@@ -41,7 +41,7 @@ Confirmed working on Raspberry Pi 3b, 3b+, 4. Other versions will probably work,
   - `git clone https://github.com/Ruud14/SecurityCamera.git`
   
 ### How to run
-- Assuming you are in the cloned repository directory, **you can run the full script by running `python3 main.py`**. 
+- Assuming you are in the cloned repository directory, **you can run the full script by running `python3 main.py`**. But first make sure all necessary packages are installed: `pip3 install -r requirements.txt`.
 - If the default settings don't fit your needs, you should follow the *configuration guide* below.
 - Stream:
     - The live stream can be accessed on `http://<local_pi_ip>:8000/index.html` as long as `streamer_active` is set to `true` in the configuration file. Don't forget to replace `<local_pi_ip>` with the local IP address of your Raspberry Pi.
