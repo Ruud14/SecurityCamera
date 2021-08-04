@@ -36,8 +36,15 @@ class Storage:
             os.mkdir(rec_dir_path)
 
         output_file_path = os.path.join(rec_dir_path, file_name)
-        shutil.move(file_path, output_file_path)
-        print("Stored {} in local storage.".format(file_name))
+        
+        # Try moving the recording to the recordings directory. Delete file if this operation fails.
+        try:
+            shutil.move(file_path, output_file_path)
+            print("Stored {} in local storage.".format(file_name))
+        except Exception as e:
+            os.remove(file_path)
+            print("Removed {}. Could not be put into local storage.".format(file_name))
+
 
     # Sends the recorded file to server and deletes the file.
     def _send_recording(self, file_path):
