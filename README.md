@@ -1,5 +1,5 @@
 
-*NOTE: This entire project is for the legacy pi cameras* 
+*NOTE: This entire project is for the legacy pi cameras*  
 *NOTE: Legacy versions of this project are moved to the 'legacy' directory (These are the legacy versions of THIS project, not to be confused with the legacy versions of the pi camera)*
 
 # Raspberry Pi security camera system.
