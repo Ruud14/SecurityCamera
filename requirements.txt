@@ -2,7 +2,7 @@ chardet==4.0.0
 numpy==1.19.5
 picamera==1.13
 python-apt==2.2.1
-requests==2.25.1
+requests==2.32.0
 six==1.16.0
 ssh-import-id==5.10
 tornado==6.4
