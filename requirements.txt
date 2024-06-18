@@ -6,4 +6,4 @@ requests==2.25.1
 six==1.16.0
 ssh-import-id==5.10
 tornado==6.4
-urllib3==1.26.5
+urllib3==1.26.19
